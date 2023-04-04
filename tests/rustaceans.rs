@@ -7,7 +7,7 @@ pub mod common;
 fn test_get_rustaceans() {
     let client = Client::new();
     let response = client
-        .get("http://127.0.0.1:8000/rustaceans")
+        .get(format!("{}/rustaceans", common::APP_HOST))
         .send()
         .unwrap();
     assert_eq!(response.status(), StatusCode::OK);
@@ -17,7 +17,7 @@ fn test_get_rustaceans() {
     let rustacean2 = common::create_test_rustacean(&client);
 
     let response = client
-        .get("http://127.0.0.1:8000/rustaceans")
+        .get(format!("{}/rustaceans", common::APP_HOST))
         .send()
         .unwrap();
 
@@ -36,7 +36,7 @@ fn test_get_rustaceans() {
 fn test_create_rustacean() {
     let client = Client::new();
     let response = client
-        .post("http://127.0.0.1:8000/rustaceans")
+        .post(format!("{}/rustaceans", common::APP_HOST))
         .json(&json!({
             "email": "foo@bar.com",
             "name": "Foo",
@@ -127,10 +127,13 @@ fn test_update_rustacean() {
 #[test]
 fn test_delete_rustacean() {
     let client = Client::new();
-    let json = common::create_test_rustacean(&client);
+    let rustacean = common::create_test_rustacean(&client);
 
     let response = client
-        .delete(format!("http://127.0.0.1:8000/rustaceans/{}", json["id"]))
+        .delete(format!(
+            "http://127.0.0.1:8000/rustaceans/{}",
+            rustacean["id"]
+        ))
         .send()
         .unwrap();
 
