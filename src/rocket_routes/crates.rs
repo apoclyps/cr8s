@@ -27,10 +27,10 @@ pub async fn view_crate(db: DbConn, id: i32) -> Result<Value, Custom<Value>> {
 }
 
 #[post("/crates", format = "json", data = "<new_crate>")]
-pub async fn create_crate(db: DbConn, new_crate: Json<NewCrate>) -> Result<Value, Custom<Value>> {
+pub async fn create_crate(db: DbConn, new_crate: Json<NewCrate>) -> Result<Custom<Value>, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::create(c, new_crate.into_inner())
-            .map(|created_crate: Crate| json!(created_crate))
+            .map(|new_crate| Custom(Status::Created, json!(new_crate)))
             .map_err(|_e| Custom(Status::InternalServerError, json!("Something went wrong")))
     })
     .await
