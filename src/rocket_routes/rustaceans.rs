@@ -2,6 +2,8 @@ use rocket::http::Status;
 use rocket::response::status::{Custom, NoContent};
 use rocket::serde::json::{serde_json::json, Json, Value};
 
+use super::server_error;
+use crate::diesel::result::Error::NotFound;
 use crate::models::{NewRustacean, Rustacean};
 use crate::repositories::RustaceanRepository;
 use crate::rocket_routes::DbConn;
@@ -19,9 +21,12 @@ pub async fn get_rustaceans(db: DbConn) -> Result<Value, Custom<Value>> {
 #[get("/rustaceans/<id>")]
 pub async fn view_rustacean(db: DbConn, id: i32) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
-        RustaceanRepository::find(c, id)
+        RustaceanRepository::find(&c, id)
             .map(|rustacean| json!(rustacean))
-            .map_err(|_e| Custom(Status::InternalServerError, json!("Something went wrong")))
+            .map_err(|e| match e {
+                NotFound => Custom(Status::NotFound, json!("Rustacean not found")),
+                _ => server_error(&e.into()),
+            })
     })
     .await
 }

@@ -2,6 +2,7 @@ use rocket::http::Status;
 use rocket::response::status::{Custom, NoContent};
 use rocket::serde::json::{serde_json::json, Json, Value};
 
+use crate::diesel::result::Error::NotFound;
 use crate::models::{Crate, NewCrate};
 use crate::repositories::CrateRepository;
 use crate::rocket_routes::DbConn;
@@ -23,7 +24,10 @@ pub async fn view_crate(db: DbConn, id: i32) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::find(c, id)
             .map(|view_crate: Crate| json!(view_crate))
-            .map_err(|e| server_error(&e.into()))
+            .map_err(|e| match e {
+                NotFound => Custom(Status::NotFound, json!({"error": "Crate not found"})),
+                _ => server_error(&e.into()),
+            })
     })
     .await
 }

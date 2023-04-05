@@ -124,6 +124,15 @@ fn test_view_crate() {
         })
     );
 
+    let unknown_crate_id: i32 = 999999;
+
+    let response = client
+        .get(format!("{}/crates/{}", common::APP_HOST, unknown_crate_id))
+        .send()
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+
     common::delete_test_crate(&client, a_crate);
     common::delete_test_crate(&client, b_crate);
     common::delete_test_rustacean(&client, rustacean);

@@ -88,6 +88,19 @@ fn test_view_rustacean() {
         })
     );
 
+    let unknown_rustacean_id: i32 = 999999;
+
+    let response = client
+        .get(format!(
+            "{}/rustaceans/{}",
+            common::APP_HOST,
+            unknown_rustacean_id
+        ))
+        .send()
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::NOT_FOUND);
+
     common::delete_test_rustacean(&client, rustacean);
 }
 
