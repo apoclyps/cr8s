@@ -41,12 +41,15 @@ pub struct NewCrate {
     pub version: String,
     pub description: Option<String>,
 }
+
+#[derive(Identifiable, Queryable, Debug)]
 pub struct User {
     pub id: i32,
     pub username: String,
     pub password: String,
     pub created_at: NaiveDateTime,
 }
+
 #[derive(Insertable)]
 #[table_name = "users"]
 pub struct NewUser {
@@ -54,12 +57,14 @@ pub struct NewUser {
     pub password: String,
 }
 
+#[derive(Queryable, Debug)]
 pub struct Role {
     pub id: i32,
     pub code: String,
     pub name: String,
     pub created_at: NaiveDateTime,
 }
+
 #[derive(Insertable)]
 #[table_name = "roles"]
 pub struct NewRole {
@@ -67,7 +72,7 @@ pub struct NewRole {
     pub name: String,
 }
 
-#[derive(Associations)]
+#[derive(Identifiable, Associations, Queryable)]
 #[belongs_to(User)]
 #[belongs_to(Role)]
 #[table_name = "users_roles"]
@@ -76,6 +81,7 @@ pub struct UserRole {
     pub user_id: i32,
     pub role_id: i32,
 }
+
 #[derive(Insertable)]
 #[table_name = "users_roles"]
 pub struct NewUserRole {

@@ -77,3 +77,75 @@ impl CrateRepository {
         diesel::delete(crates::table.find(id)).execute(c)
     }
 }
+
+pub struct UserRepository;
+
+impl UserRepository {
+    pub fn create(
+        c: &PgConnection,
+        new_user: NewUser,
+        role_codes: Vec<String>,
+    ) -> QueryResult<User> {
+        let user = diesel::insert_into(users::table)
+            .values(new_user)
+            .get_result::<User>(c)?;
+
+        for role_code in role_codes {
+            let new_user_role = {
+                if let Ok(role) = RoleRepository::find_by_code(&c, &role_code) {
+                    NewUserRole {
+                        user_id: user.id,
+                        role_id: role.id,
+                    }
+                } else {
+                    let new_role = NewRole {
+                        code: role_code.to_owned(),
+                        name: role_code.to_owned(),
+                    };
+                    let role = RoleRepository::create(&c, new_role)?;
+                    NewUserRole {
+                        user_id: user.id,
+                        role_id: role.id,
+                    }
+                }
+            };
+            diesel::insert_into(users_roles::table)
+                .values(new_user_role)
+                .execute(c)?;
+        }
+
+        Ok(user)
+    }
+}
+
+pub struct RoleRepository;
+
+impl RoleRepository {
+    pub fn find_by_user(c: &PgConnection, user: &User) -> QueryResult<Vec<Role>> {
+        let user_roles = UserRole::belonging_to(user).get_results(c)?;
+
+        Self::find_by_ids(
+            &c,
+            user_roles
+                .iter()
+                .map(|user_role: &UserRole| user_role.role_id)
+                .collect(),
+        )
+    }
+
+    pub fn find_by_ids(c: &PgConnection, ids: Vec<i32>) -> QueryResult<Vec<Role>> {
+        roles::table.filter(roles::id.eq_any(ids)).get_results(c)
+    }
+
+    pub fn find_by_code(c: &PgConnection, code: &String) -> QueryResult<Role> {
+        roles::table
+            .filter(roles::code.eq(code))
+            .get_result::<Role>(c)
+    }
+
+    pub fn create(c: &PgConnection, new_role: NewRole) -> QueryResult<Role> {
+        diesel::insert_into(roles::table)
+            .values(new_role)
+            .get_result(c)
+    }
+}
