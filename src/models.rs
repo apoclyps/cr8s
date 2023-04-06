@@ -72,7 +72,7 @@ pub struct NewRole {
     pub name: String,
 }
 
-#[derive(Identifiable, Associations, Queryable)]
+#[derive(Identifiable, Associations, Queryable, Debug)]
 #[belongs_to(User)]
 #[belongs_to(Role)]
 #[table_name = "users_roles"]

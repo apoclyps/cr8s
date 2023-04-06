@@ -35,6 +35,17 @@ pub fn create_user(username: String, password: String, role_codes: Vec<String>) 
     println!("Roles assigned {:?}", roles);
 }
 
-pub fn list_users() {}
+pub fn list_users() {
+    let c: PgConnection = load_db_connection();
 
-pub fn delete_user(id: i32) {}
+    let users = UserRepository::find_with_roles(&c).unwrap();
+    for user in users {
+        println!("User: {:?}", user);
+    }
+}
+
+pub fn delete_user(id: i32) {
+    let c = load_db_connection();
+
+    UserRepository::delete(&c, id).unwrap();
+}
