@@ -30,5 +30,5 @@ docker-compose exec app cargo run --bin cli users create kyle 1234 admin
 ### Login
 
 ```bash
-curl -X POST http://localhost:8000/heros -H 'Content-Type: application/json' -d '"username": "kyle", "password": "1234"}' | jq
+curl -X POST http://localhost:8000/login -H 'Content-Type: application/json' -d '{"username": "kyle", "password": "1234"}' | jq
 ```
