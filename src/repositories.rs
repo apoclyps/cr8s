@@ -81,6 +81,10 @@ impl CrateRepository {
 pub struct UserRepository;
 
 impl UserRepository {
+    pub fn find(c: &PgConnection, id: i32) -> QueryResult<User> {
+        users::table.find(id).get_result::<User>(c)
+    }
+
     pub fn find_with_roles(c: &PgConnection) -> QueryResult<Vec<(User, Vec<(UserRole, Role)>)>> {
         let users = users::table.load(c)?;
         let result = users_roles::table

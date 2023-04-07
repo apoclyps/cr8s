@@ -28,7 +28,7 @@ fn test_login() {
         }))
         .send()
         .unwrap();
-    
+
     assert_eq!(response.status(), StatusCode::OK);
 
     let json: Value = response.json().unwrap();

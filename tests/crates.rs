@@ -1,11 +1,11 @@
-use reqwest::{blocking::Client, StatusCode};
+use reqwest::{blocking::Client, header::AUTHORIZATION, StatusCode};
 use serde_json::{json, Value};
 
 pub mod common;
 
 #[test]
 fn test_get_crates() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let response = client
         .get(format!("{}/crates", common::APP_HOST))
         .send()
@@ -34,7 +34,7 @@ fn test_get_crates() {
 
 #[test]
 fn test_create_crate() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let response = client
         .post(format!("{}/crates", common::APP_HOST))
@@ -70,7 +70,7 @@ fn test_create_crate() {
 
 #[test]
 fn test_view_crate() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
 
@@ -139,8 +139,22 @@ fn test_view_crate() {
 }
 
 #[test]
+fn test_view_crate_returns_unauthorised() {
+    let client: Client = Client::new();
+    let invalid_token: &str = "invalid_token";
+
+    let response = client
+        .get(format!("{}/crates", common::APP_HOST))
+        .header(AUTHORIZATION, format!("Bearer {}", invalid_token))
+        .send()
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[test]
 fn test_update_crate() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
 
@@ -179,7 +193,7 @@ fn test_update_crate() {
 
 #[test]
 fn test_delete_crate() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
 

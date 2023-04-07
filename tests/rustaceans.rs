@@ -1,11 +1,11 @@
-use reqwest::{blocking::Client, StatusCode};
+use reqwest::{blocking::Client, StatusCode, header::AUTHORIZATION};
 use serde_json::{json, Value};
 
 pub mod common;
 
 #[test]
 fn test_get_rustaceans() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let response = client
         .get(format!("{}/rustaceans", common::APP_HOST))
         .send()
@@ -33,8 +33,22 @@ fn test_get_rustaceans() {
 }
 
 #[test]
+fn test_get_rustaceans_returns_unauthorised() {
+    let client: Client = Client::new();
+    let invalid_token: &str = "invalid_token";
+
+    let response = client
+        .get(format!("{}/rustaceans", common::APP_HOST))
+        .header(AUTHORIZATION, format!("Bearer {}", invalid_token))
+        .send()
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[test]
 fn test_create_rustacean() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let response = client
         .post(format!("{}/rustaceans", common::APP_HOST))
         .json(&json!({
@@ -63,7 +77,7 @@ fn test_create_rustacean() {
 
 #[test]
 fn test_view_rustacean() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
 
     let response = client
@@ -106,7 +120,7 @@ fn test_view_rustacean() {
 
 #[test]
 fn test_update_rustacean() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
 
     let response = client
@@ -139,7 +153,7 @@ fn test_update_rustacean() {
 
 #[test]
 fn test_delete_rustacean() {
-    let client = Client::new();
+    let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
 
     let response = client
