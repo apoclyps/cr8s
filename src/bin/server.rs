@@ -3,6 +3,8 @@ extern crate cr8s;
 #[macro_use]
 extern crate rocket;
 
+use rocket_db_pools::Database;
+
 #[rocket::main]
 async fn main() {
     let _ = rocket::build()
@@ -23,6 +25,7 @@ async fn main() {
             ],
         )
         .attach(cr8s::rocket_routes::DbConn::fairing())
+        .attach(cr8s::rocket_routes::CacheConn::init())
         .launch()
         .await;
 }

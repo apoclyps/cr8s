@@ -2,15 +2,17 @@ use rocket::{
     response::status::Custom,
     serde::json::{json, Json, Value},
 };
+use rocket_db_pools::Connection;
 
 use crate::auth;
 use crate::repositories::UserRepository;
 
-use super::{server_error, DbConn};
+use super::{server_error, CacheConn, DbConn};
 
 #[post("/login", format = "json", data = "<credentials>")]
 pub async fn login(
     db: DbConn,
+    cache: Connection<CacheConn>,
     credentials: Json<auth::Credentials>,
 ) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
