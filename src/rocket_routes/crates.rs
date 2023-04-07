@@ -3,14 +3,14 @@ use rocket::response::status::{Custom, NoContent};
 use rocket::serde::json::{serde_json::json, Json, Value};
 
 use crate::diesel::result::Error::NotFound;
-use crate::models::{Crate, NewCrate, User};
+use crate::models::{Crate, NewCrate};
 use crate::repositories::CrateRepository;
 use crate::rocket_routes::DbConn;
 
-use super::server_error;
+use super::{server_error, EditorUser};
 
 #[get("/crates")]
-pub async fn get_crates(db: DbConn, _user: User) -> Result<Value, Custom<Value>> {
+pub async fn get_crates(db: DbConn, _user: EditorUser) -> Result<Value, Custom<Value>> {
     db.run(|c| {
         CrateRepository::find_multiple(c, 100)
             .map(|crates| json!(crates))
@@ -20,7 +20,7 @@ pub async fn get_crates(db: DbConn, _user: User) -> Result<Value, Custom<Value>>
 }
 
 #[get("/crates/<id>")]
-pub async fn view_crate(db: DbConn, _user: User, id: i32) -> Result<Value, Custom<Value>> {
+pub async fn view_crate(db: DbConn, _user: EditorUser, id: i32) -> Result<Value, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::find(c, id)
             .map(|view_crate: Crate| json!(view_crate))
@@ -35,7 +35,7 @@ pub async fn view_crate(db: DbConn, _user: User, id: i32) -> Result<Value, Custo
 #[post("/crates", format = "json", data = "<new_crate>")]
 pub async fn create_crate(
     db: DbConn,
-    _user: User,
+    _user: EditorUser,
     new_crate: Json<NewCrate>,
 ) -> Result<Custom<Value>, Custom<Value>> {
     db.run(move |c| {
@@ -49,7 +49,7 @@ pub async fn create_crate(
 #[put("/crates/<id>", format = "json", data = "<update_crate>")]
 pub async fn update_crate(
     db: DbConn,
-    _user: User,
+    _user: EditorUser,
     id: i32,
     update_crate: Json<Crate>,
 ) -> Result<Value, Custom<Value>> {
@@ -62,7 +62,11 @@ pub async fn update_crate(
 }
 
 #[delete("/crates/<id>")]
-pub async fn delete_crate(db: DbConn, _user: User, id: i32) -> Result<NoContent, Custom<Value>> {
+pub async fn delete_crate(
+    db: DbConn,
+    _user: EditorUser,
+    id: i32,
+) -> Result<NoContent, Custom<Value>> {
     db.run(move |c| {
         CrateRepository::delete(c, id)
             .map(|_| NoContent)

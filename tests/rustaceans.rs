@@ -1,4 +1,4 @@
-use reqwest::{blocking::Client, StatusCode, header::AUTHORIZATION};
+use reqwest::{blocking::Client, header::AUTHORIZATION, StatusCode};
 use serde_json::{json, Value};
 
 pub mod common;
@@ -16,6 +16,7 @@ fn test_get_rustaceans() {
 
     let rustacean2 = common::create_test_rustacean(&client);
 
+    let client = common::get_client_with_logged_in_viewer();
     let response = client
         .get(format!("{}/rustaceans", common::APP_HOST))
         .send()
@@ -27,6 +28,9 @@ fn test_get_rustaceans() {
 
     assert!(response_json.as_array().unwrap().contains(&rustacean1));
     assert!(response_json.as_array().unwrap().contains(&rustacean2));
+
+    // Cleanup
+    let client = common::get_client_with_logged_in_admin();
 
     common::delete_test_rustacean(&client, rustacean1);
     common::delete_test_rustacean(&client, rustacean2);
@@ -49,6 +53,7 @@ fn test_get_rustaceans_returns_unauthorised() {
 #[test]
 fn test_create_rustacean() {
     let client = common::get_client_with_logged_in_admin();
+
     let response = client
         .post(format!("{}/rustaceans", common::APP_HOST))
         .json(&json!({
@@ -115,6 +120,7 @@ fn test_view_rustacean() {
 
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
+    let client = common::get_client_with_logged_in_admin();
     common::delete_test_rustacean(&client, rustacean);
 }
 

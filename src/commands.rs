@@ -2,7 +2,7 @@ use diesel::{Connection, PgConnection};
 
 use crate::{
     auth,
-    models::{NewUser, Role, User, UserRole},
+    models::{NewUser, Role, RoleCode, User, UserRole},
     repositories::{RoleRepository, UserRepository},
 };
 
@@ -16,9 +16,13 @@ pub fn create_user(username: String, password: String, role_codes: Vec<String>) 
 
     let password_hash: String = auth::hash_password(password).unwrap();
     let new_user: NewUser = NewUser {
-        username: username,
+        username,
         password: password_hash,
     };
+    let role_codes = role_codes
+        .iter()
+        .map(|v| RoleCode::from_string(v.to_owned()).unwrap())
+        .collect();
     let user: User = UserRepository::create(&c, new_user, role_codes).unwrap();
 
     println!("User created {:?}", user);

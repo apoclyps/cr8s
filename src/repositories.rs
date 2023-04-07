@@ -103,7 +103,7 @@ impl UserRepository {
     pub fn create(
         c: &PgConnection,
         new_user: NewUser,
-        role_codes: Vec<String>,
+        role_codes: Vec<RoleCode>,
     ) -> QueryResult<User> {
         let user = diesel::insert_into(users::table)
             .values(new_user)
@@ -117,10 +117,12 @@ impl UserRepository {
                         role_id: role.id,
                     }
                 } else {
-                    let new_role = NewRole {
-                        code: role_code.to_owned(),
-                        name: role_code.to_owned(),
+                    let name: String = role_code.as_str().to_owned();
+                    let new_role: NewRole = NewRole {
+                        code: role_code,
+                        name,
                     };
+
                     let role = RoleRepository::create(&c, new_role)?;
                     NewUserRole {
                         user_id: user.id,
@@ -162,7 +164,7 @@ impl RoleRepository {
         roles::table.filter(roles::id.eq_any(ids)).get_results(c)
     }
 
-    pub fn find_by_code(c: &PgConnection, code: &String) -> QueryResult<Role> {
+    pub fn find_by_code(c: &PgConnection, code: &RoleCode) -> QueryResult<Role> {
         roles::table
             .filter(roles::code.eq(code))
             .get_result::<Role>(c)

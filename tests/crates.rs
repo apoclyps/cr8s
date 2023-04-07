@@ -5,6 +5,7 @@ pub mod common;
 
 #[test]
 fn test_get_crates() {
+    // Setup
     let client = common::get_client_with_logged_in_admin();
     let response = client
         .get(format!("{}/crates", common::APP_HOST))
@@ -16,6 +17,9 @@ fn test_get_crates() {
     let rustacean = common::create_test_rustacean(&client);
     let crate1 = common::create_test_crate(&client, &rustacean);
     let crate2 = common::create_test_crate(&client, &rustacean);
+
+    // Assertions
+    let client = common::get_client_with_logged_in_viewer();
     let response = client
         .get(format!("{}/crates", common::APP_HOST))
         .send()
@@ -27,6 +31,9 @@ fn test_get_crates() {
 
     assert!(response_json.as_array().unwrap().contains(&crate1));
     assert!(response_json.as_array().unwrap().contains(&crate2));
+
+    // Cleanup.
+    let client = common::get_client_with_logged_in_admin();
 
     common::delete_test_crate(&client, crate1);
     common::delete_test_crate(&client, crate2);
@@ -73,6 +80,8 @@ fn test_view_crate() {
     let client = common::get_client_with_logged_in_admin();
     let rustacean = common::create_test_rustacean(&client);
     let a_crate = common::create_test_crate(&client, &rustacean);
+
+    let client = common::get_client_with_logged_in_viewer();
 
     let response = client
         .get(format!("{}/crates/{}", common::APP_HOST, a_crate["id"]))
@@ -133,6 +142,8 @@ fn test_view_crate() {
 
     assert_eq!(response.status(), StatusCode::NOT_FOUND);
 
+    let client = common::get_client_with_logged_in_admin();
+
     common::delete_test_crate(&client, a_crate);
     common::delete_test_crate(&client, b_crate);
     common::delete_test_rustacean(&client, rustacean);
@@ -148,6 +159,8 @@ fn test_view_crate_returns_unauthorised() {
         .header(AUTHORIZATION, format!("Bearer {}", invalid_token))
         .send()
         .unwrap();
+
+    println!("{:?}", response);
 
     assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
 }
