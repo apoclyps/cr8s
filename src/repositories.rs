@@ -90,6 +90,12 @@ impl UserRepository {
         Ok(users.into_iter().zip(result).collect())
     }
 
+    pub fn find_by_username(c: &PgConnection, username: &String) -> QueryResult<User> {
+        users::table
+            .filter(users::username.eq(username))
+            .get_result::<User>(c)
+    }
+
     pub fn create(
         c: &PgConnection,
         new_user: NewUser,
