@@ -1,5 +1,7 @@
 use crate::models::*;
 use crate::schema::*;
+use diesel::dsl::now;
+use diesel::dsl::IntervalDsl;
 use diesel::prelude::*;
 use diesel::PgConnection;
 
@@ -42,6 +44,13 @@ impl RustaceanRepository {
 pub struct CrateRepository;
 
 impl CrateRepository {
+    pub fn find_since(c: &PgConnection, hours_since: i32) -> QueryResult<Vec<Crate>> {
+        crates::table
+            .filter(crates::created_at.ge(now - hours_since.seconds()))
+            .order(crates::id.desc())
+            .load::<Crate>(c)
+    }
+
     pub fn find_multiple(c: &PgConnection, limit: i64) -> QueryResult<Vec<Crate>> {
         crates::table
             .limit(limit)
