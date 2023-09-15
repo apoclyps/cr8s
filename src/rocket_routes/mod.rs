@@ -28,6 +28,12 @@ fn server_error(error: &Box<dyn Error>) -> Custom<Value> {
     Custom(Status::InternalServerError, json!("Something went wrong"))
 }
 
+#[rocket::options("/<_route_args..>")]
+pub fn options(_route_args: Option<std::path::PathBuf>) {
+    // Just to add CORS header via the fairing.
+}
+
+
 pub struct EditorUser(User);
 
 #[rocket::async_trait]

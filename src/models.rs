@@ -44,10 +44,11 @@ pub struct NewCrate {
     pub description: Option<String>,
 }
 
-#[derive(Identifiable, Queryable, Debug)]
+#[derive(Identifiable, Queryable, Debug, Serialize)]
 pub struct User {
     pub id: i32,
     pub username: String,
+    #[serde(skip_serializing)]
     pub password: String,
     pub created_at: NaiveDateTime,
 }

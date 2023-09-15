@@ -32,11 +32,6 @@ impl Fairing for CORS {
     }
 }
 
-/// Catches all OPTION requests in order to get the CORS related Fairing triggered.
-#[options("/<_..>")]
-fn all_options() {
-    /* Intentionally left empty */
-}
 
 #[rocket::main]
 async fn main() {
@@ -44,8 +39,9 @@ async fn main() {
         .mount(
             "/",
             routes![
-                all_options,
+                cr8s::rocket_routes::options,
                 cr8s::rocket_routes::authorization::login,
+                cr8s::rocket_routes::authorization::me,
                 cr8s::rocket_routes::rustaceans::get_rustaceans,
                 cr8s::rocket_routes::rustaceans::view_rustacean,
                 cr8s::rocket_routes::rustaceans::create_rustacean,
