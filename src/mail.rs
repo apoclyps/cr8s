@@ -4,7 +4,6 @@ use lettre::transport::smtp::response::Response;
 use lettre::Transport;
 use lettre::{Message, SmtpTransport};
 use tera::Context;
-
 pub struct HtmlMailer {
     pub credentials: Credentials,
     pub smtp_host: String,
@@ -14,14 +13,13 @@ pub struct HtmlMailer {
 impl HtmlMailer {
     pub fn send(
         self,
-        subject: &str,
         to: &String,
         template_name: &str,
         context: &Context,
     ) -> Result<Response, Box<dyn std::error::Error>> {
         let html_body = self.template_engine.render(template_name, &context)?;
         let message = Message::builder()
-            .subject(subject)
+            .subject("Cr8s digest")
             .from("Cr8s <info@cr8s.com>".parse()?)
             .to(to.parse()?)
             .header(ContentType::TEXT_HTML)
